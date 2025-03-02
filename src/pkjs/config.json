@@ -1,0 +1,41 @@
+[
+    { 
+      "type": "heading", 
+      "defaultValue": "Tramlines" 
+    }, 
+    { 
+      "type": "text", 
+      "defaultValue": "Aufgrund der Open-Source-Natur dieser App, können wir keine Garantie für die Richtigkeit der Daten geben. Die Daten werden von der Deutschen Bahn AG bereitgestellt." 
+    },
+    { 
+      "type": "section", 
+      "items": [
+        { 
+          "type": "heading", 
+          "defaultValue": "Einstellungen" 
+        },
+        { 
+          "type": "input", 
+          "messageKey": "RADIUS", 
+          "label": "Radius (in km)", 
+          "defaultValue": "5", 
+          "attributes": {
+            "placeholder": "5" 
+          } 
+        },
+        { 
+          "type": "input", 
+          "messageKey": "API_URL", 
+          "label": "Server verfügbar unter github.com/tramlines-pt/bahnhof-server", 
+          "defaultValue": "https://api.tramlines.de", 
+          "attributes": {
+            "placeholder": "https://api.tramlines.de" 
+          } 
+        }
+      ] 
+    },
+    { 
+      "type": "submit", 
+      "defaultValue": "Speichern" 
+    }
+  ]

@@ -1,0 +1,70 @@
+{
+  "name": "tramlines",
+  "author": "JPlexer",
+  "version": "1.0.0",
+  "keywords": [
+    "pebble-app"
+  ],
+  "private": true,
+  "dependencies": {
+    "pebble-clay": "^1.0.4"
+  },
+  "pebble": {
+    "displayName": "Tramlines",
+    "uuid": "a0311314-883a-4f2b-9b27-6e0fa8537934",
+    "sdkVersion": "3",
+    "capabilities": [
+      "location"
+    ],
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": [
+      "NO_INTERNET",
+      "STATIONS_ARRAY",
+      "RADIUS",
+      "GET_STATION",
+      "STATION_ARRAY",
+      "GET_MORE_INFO",
+      "MORE_INFO",
+      "STOPS_MORE_INFO",
+      "MORE_INFO_TIMEOUT",
+      "GET_STATION_FROM_STOP",
+      "STATION_FROM_STOP",
+      "RADIUS",
+      "API_URL"
+    ],
+    "resources": {
+      "media": [
+        {
+          "menuIcon": true,
+          "type": "png",
+          "name": "IMAGE_MENU_ICON",
+          "file": "images/menu_icon.png"
+        },
+        {
+          "type": "raw",
+          "name": "IMAGE_WATCH_DISCONNECTED",
+          "file": "images/Pebble_80x80_Watch_disconnected.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "IMAGE_TRAIN",
+          "file": "images/train.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "IMAGE_TRAM",
+          "file": "images/tram.pdc"
+        }
+      ]
+    }
+  }
+}

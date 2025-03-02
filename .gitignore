@@ -1,0 +1,8 @@
+#gitignore for a pebble project
+build/
+logs/
+.DS_Store
+.lock-waf_linux_build
+node_modules/
+.vscode/
+package-lock.json
