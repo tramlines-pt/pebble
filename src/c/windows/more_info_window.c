@@ -361,10 +361,88 @@ static void menu_select_handler(ClickRecognizerRef recognizer, void *context) {
   }
 }
 
+static AppTimer *s_scroll_timer = NULL;
+static bool s_scrolling_up = false;
+
+static void scroll_timer_callback(void *data) {
+  // Safety check
+  if (!s_menu_layer || layer_get_hidden(menu_layer_get_layer(s_menu_layer))) {
+    return;
+  }
+  
+  // Continue scrolling in the appropriate direction
+  if (s_scrolling_up) {
+    MenuIndex index = menu_layer_get_selected_index(s_menu_layer);
+    if (index.row > 0) {
+      menu_layer_set_selected_next(s_menu_layer, true, MenuRowAlignCenter, true);
+      // Schedule next scroll
+      s_scroll_timer = app_timer_register(200, scroll_timer_callback, NULL);
+    }
+  } else {
+    MenuIndex index = menu_layer_get_selected_index(s_menu_layer);
+    if (index.row < s_num_stops - 1) {
+      menu_layer_set_selected_next(s_menu_layer, false, MenuRowAlignCenter, true);
+      // Schedule next scroll
+      s_scroll_timer = app_timer_register(200, scroll_timer_callback, NULL);
+    }
+  }
+}
+
+static void menu_up_long_start(ClickRecognizerRef recognizer, void *context) {
+  // Safety check
+  if (!s_menu_layer || layer_get_hidden(menu_layer_get_layer(s_menu_layer))) {
+    return;
+  }
+  
+  // First scroll once immediately
+  MenuIndex index = menu_layer_get_selected_index(s_menu_layer);
+  if (index.row == 0) {
+    deactivate_menu();
+    show_info();
+    return;
+  }
+  
+  // Set scrolling direction and start continuous scrolling
+  s_scrolling_up = true;
+  menu_layer_set_selected_next(s_menu_layer, true, MenuRowAlignCenter, true);
+  // Start timer for continuous scrolling
+  s_scroll_timer = app_timer_register(100, scroll_timer_callback, NULL);
+}
+
+static void menu_down_long_start(ClickRecognizerRef recognizer, void *context) {
+  // Safety check
+  if (!s_menu_layer || layer_get_hidden(menu_layer_get_layer(s_menu_layer))) {
+    return;
+  }
+  
+  // First scroll once immediately
+  MenuIndex index = menu_layer_get_selected_index(s_menu_layer);
+  if (index.row >= s_num_stops - 1) {
+    return;
+  }
+  
+  // Set scrolling direction and start continuous scrolling
+  s_scrolling_up = false;
+  menu_layer_set_selected_next(s_menu_layer, false, MenuRowAlignCenter, true);
+  // Start timer for continuous scrolling
+  s_scroll_timer = app_timer_register(100, scroll_timer_callback, NULL);
+}
+
+static void menu_long_stop(ClickRecognizerRef recognizer, void *context) {
+  // Cancel any ongoing scrolling timer
+  if (s_scroll_timer) {
+    app_timer_cancel(s_scroll_timer);
+    s_scroll_timer = NULL;
+  }
+}
+
 static void menu_click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_UP, menu_up_handler);
   window_single_click_subscribe(BUTTON_ID_DOWN, menu_down_handler);
   window_single_click_subscribe(BUTTON_ID_SELECT, menu_select_handler);
+
+  window_long_click_subscribe(BUTTON_ID_UP, 100, menu_up_long_start, menu_long_stop);
+  window_long_click_subscribe(BUTTON_ID_DOWN, 100, menu_down_long_start, menu_long_stop);
 }
 
 static void show_info() {
