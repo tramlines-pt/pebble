@@ -9,7 +9,8 @@ static void init() {
   app_message_register_inbox_received(inbox_received_callback);
   app_message_register_inbox_dropped(inbox_dropped_callback);
   app_message_register_outbox_failed(outbox_failed_callback);
-  app_message_open(2048, 256); // Inbox could be large, but outbox is pretty much only requests
+  app_message_open(4096, 256); // Inbox could be large, but outbox is pretty much only requests
+  
 }
 
 static void deinit() {

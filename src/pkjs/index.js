@@ -65,9 +65,9 @@ function success(pos) {
         var stationsArray = response.map(function(station) {
           return [station[0], station[1].toString(), station[2].toString()];
         });
-        // we need to check if the station data will fit in the buffer (uint32_t 1024) (it probably will), 
+        // we need to check if the station data will fit in the buffer (uint32_t 4096) (it probably will), 
         // but if not remove the last element until it fit
-        while (JSON.stringify(stationsArray).length > 1024) {
+        while (JSON.stringify(stationsArray).length > 4000) {
           stationsArray.pop();
         }
         Pebble.sendAppMessage({"STATIONS_ARRAY": JSON.stringify(stationsArray)});
@@ -113,9 +113,9 @@ Pebble.addEventListener("appmessage", function(e) {
           departure[5].toString() // Platform
         ];
         });
-        // we need to check if the station data will fit in the buffer (uint32_t 1024 (Byte)), 
+        // we need to check if the station data will fit in the buffer (uint32_t 4096 (Byte)), 
         // if not remove the last element until it fits
-        while (JSON.stringify(departuresArray).length > 1024) {
+        while (JSON.stringify(departuresArray).length > 4000) {
           departuresArray.pop();
         }
         if (dict["GET_STATION"]) {
