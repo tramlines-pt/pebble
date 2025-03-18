@@ -1,7 +1,7 @@
 {
   "name": "tramlines",
   "author": "JPlexer",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "keywords": [
     "pebble-app"
   ],
@@ -21,7 +21,8 @@
       "aplite",
       "basalt",
       "chalk",
-      "diorite"
+      "diorite",
+      "emery"
     ],
     "watchapp": {
       "watchface": false
@@ -61,8 +62,18 @@
         },
         {
           "type": "raw",
+          "name": "IMAGE_TRAIN_EMERY",
+          "file": "images/train_emery.pdc"
+        },
+        {
+          "type": "raw",
           "name": "IMAGE_TRAM",
           "file": "images/tram.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "IMAGE_TRAM_EMERY",
+          "file": "images/tram_emery.pdc"
         }
       ]
     }

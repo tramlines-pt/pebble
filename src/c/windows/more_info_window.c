@@ -216,7 +216,11 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
   GRect bounds = layer_get_bounds(cell_layer);
   
   // Calculate vertical center position
+  #if PBL_PLATFORM_EMERY
+  GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
+  #else
   GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
+  #endif
   GSize text_size = graphics_text_layout_get_content_size(
     s_stops[cell_index->row], font, bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft
   );
@@ -406,7 +410,7 @@ static void menu_up_long_start(ClickRecognizerRef recognizer, void *context) {
   s_scrolling_up = true;
   menu_layer_set_selected_next(s_menu_layer, true, MenuRowAlignCenter, true);
   // Start timer for continuous scrolling
-  s_scroll_timer = app_timer_register(100, scroll_timer_callback, NULL);
+  s_scroll_timer = app_timer_register(200, scroll_timer_callback, NULL);
 }
 
 static void menu_down_long_start(ClickRecognizerRef recognizer, void *context) {
@@ -425,7 +429,7 @@ static void menu_down_long_start(ClickRecognizerRef recognizer, void *context) {
   s_scrolling_up = false;
   menu_layer_set_selected_next(s_menu_layer, false, MenuRowAlignCenter, true);
   // Start timer for continuous scrolling
-  s_scroll_timer = app_timer_register(100, scroll_timer_callback, NULL);
+  s_scroll_timer = app_timer_register(200, scroll_timer_callback, NULL);
 }
 
 static void menu_long_stop(ClickRecognizerRef recognizer, void *context) {
@@ -441,8 +445,8 @@ static void menu_click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_DOWN, menu_down_handler);
   window_single_click_subscribe(BUTTON_ID_SELECT, menu_select_handler);
 
-  window_long_click_subscribe(BUTTON_ID_UP, 100, menu_up_long_start, menu_long_stop);
-  window_long_click_subscribe(BUTTON_ID_DOWN, 100, menu_down_long_start, menu_long_stop);
+  window_long_click_subscribe(BUTTON_ID_UP, 200, menu_up_long_start, menu_long_stop);
+  window_long_click_subscribe(BUTTON_ID_DOWN, 200, menu_down_long_start, menu_long_stop);
 }
 
 static void show_info() {
@@ -572,22 +576,63 @@ static void info_layer_update_proc(Layer *layer, GContext *ctx) {
 
   // Draw the image, if it exists
   if (image != NULL) {
+    #if PBL_PLATFORM_EMERY
+    gdraw_command_image_draw(ctx, image, GPoint(bounds.size.w - 110, y_offset));
+    #else
     gdraw_command_image_draw(ctx, image, GPoint(bounds.size.w - 75, y_offset));
+    #endif
   }
 
   // Draw the line name
   graphics_context_set_text_color(ctx, GColorBlack);
+  #if PBL_PLATFORM_EMERY
+  graphics_draw_text(ctx, s_line_name, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD),
+                     GRect(x_offset, y_offset, bounds.size.w - 50, line_height), GTextOverflowModeWordWrap,
+                     GTextAlignmentLeft, NULL);
+  y_offset += line_height + 15;
+  #else
   graphics_draw_text(ctx, s_line_name, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
                      GRect(x_offset, y_offset, bounds.size.w - 50, line_height), GTextOverflowModeWordWrap,
                      GTextAlignmentLeft, NULL);
   y_offset += line_height + 5;
+  #endif
+  
 
   // Draw the platform
   if (s_platform != NULL && strlen(s_platform) > 0) {
     // Check if platform text would be too long and potentially overlap with image
     char platform_text[strlen(s_platform) + 11];
     snprintf(platform_text, sizeof(platform_text), "Platform: %s", s_platform);
+    #if PBL_PLATFORM_EMERY
+    GSize platform_size = graphics_text_layout_get_content_size(
+      platform_text,
+      fonts_get_system_font(FONT_KEY_GOTHIC_18),
+      GRect(0, 0, bounds.size.w - 110, line_height),  // Account for image width (75px)
+      GTextOverflowModeWordWrap,
+      GTextAlignmentLeft
+    );
+  
+    // If platform text would overlap with image, split into two lines
+    if (platform_size.w > bounds.size.w - 125) {
+      // First line: just "Platform:"
+      graphics_draw_text(ctx, "Platform:", fonts_get_system_font(FONT_KEY_GOTHIC_18),
+                        GRect(x_offset, y_offset, bounds.size.w - (x_offset * 2), line_height), 
+                        GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+      y_offset += line_height;
 
+      // Second line: just the platform number
+      graphics_draw_text(ctx, s_platform, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
+                        GRect(x_offset, y_offset, bounds.size.w - (x_offset * 2), line_height), 
+                        GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+      y_offset += line_height;
+    } else {
+      // If it fits, display as one line
+      graphics_draw_text(ctx, platform_text, fonts_get_system_font(FONT_KEY_GOTHIC_18),
+                        GRect(x_offset, y_offset, bounds.size.w - (x_offset * 2), line_height), 
+                        GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+      y_offset += line_height + 5;
+    }
+    #else
     GSize platform_size = graphics_text_layout_get_content_size(
       platform_text,
       fonts_get_system_font(FONT_KEY_GOTHIC_14),
@@ -616,15 +661,23 @@ static void info_layer_update_proc(Layer *layer, GContext *ctx) {
                         GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
       y_offset += line_height + 5;
     }
+    #endif
   } else {
     y_offset += line_height + 5;
   }
 
   // Draw the time
+  #if PBL_PLATFORM_EMERY
+  graphics_draw_text(ctx, s_time, fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK),
+                     GRect(x_offset, y_offset, bounds.size.w - (x_offset * 2), line_height), GTextOverflowModeWordWrap,
+                     GTextAlignmentLeft, NULL);
+  y_offset += line_height + 15;
+  #else
   graphics_draw_text(ctx, s_time, fonts_get_system_font(FONT_KEY_LECO_26_BOLD_NUMBERS_AM_PM),
                      GRect(x_offset, y_offset, bounds.size.w - (x_offset * 2), line_height), GTextOverflowModeWordWrap,
                      GTextAlignmentLeft, NULL);
   y_offset += line_height + 10;
+  #endif
 
   // Draw the delay
   #if PBL_COLOR
@@ -641,10 +694,18 @@ static void info_layer_update_proc(Layer *layer, GContext *ctx) {
   graphics_draw_text(ctx, s_delay, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD),
                      GRect(x_offset, y_offset, bounds.size.w - (x_offset * 2), line_height), GTextOverflowModeWordWrap,
                      GTextAlignmentLeft, NULL);
+  #else 
+  #if PBL_PLATFORM_EMERY
+  //For some reason the LECO font wont display the minus on Emery either
+  //But we have a bigger screen so we use a different font than Aplite
+  graphics_draw_text(ctx, s_delay, fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK),
+                     GRect(x_offset, y_offset, bounds.size.w - (x_offset * 2), line_height), GTextOverflowModeWordWrap,
+                     GTextAlignmentLeft, NULL);
   #else
   graphics_draw_text(ctx, s_delay, fonts_get_system_font(FONT_KEY_LECO_26_BOLD_NUMBERS_AM_PM),
                      GRect(x_offset, y_offset, bounds.size.w - (x_offset * 2), line_height), GTextOverflowModeWordWrap,
                      GTextAlignmentLeft, NULL);
+  #endif
   #endif
   #if PBL_COLOR
   graphics_context_set_text_color(ctx, GColorBlack);
@@ -652,6 +713,23 @@ static void info_layer_update_proc(Layer *layer, GContext *ctx) {
   
   // Draw the destination at the bottom center
   // Calculate the height needed for the destination text (allowing for up to 3 lines)
+    #if PBL_PLATFORM_EMERY
+    GSize destination_size = graphics_text_layout_get_content_size(
+      s_destination, 
+      fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD),
+      GRect(x_offset, 0, bounds.size.w - (x_offset * 2), bounds.size.h), 
+      GTextOverflowModeWordWrap,
+      GTextAlignmentCenter
+    );
+    
+    // Cap the height to 3 lines maximum
+    int dest_height = destination_size.h > (line_height * 3) ? (line_height * 3) : destination_size.h;
+    
+    // Position destination text with more space from bottom (20px instead of 10px)
+    graphics_draw_text(ctx, s_destination, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD),
+                       GRect(x_offset, bounds.size.h - dest_height - 20, bounds.size.w - (x_offset * 2), dest_height), 
+                       GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  #else
   GSize destination_size = graphics_text_layout_get_content_size(
     s_destination, 
     fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD),
@@ -667,6 +745,7 @@ static void info_layer_update_proc(Layer *layer, GContext *ctx) {
   graphics_draw_text(ctx, s_destination, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD),
                      GRect(x_offset, bounds.size.h - dest_height - 20, bounds.size.w - (x_offset * 2), dest_height), 
                      GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    #endif
   #endif
 }
 
@@ -686,8 +765,13 @@ static void window_load(Window *window) {
 
   layer_add_child(window_layer, s_info_layer);
 
+  #if PBL_PLATFORM_EMERY
+  s_tram_icon = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_TRAM_EMERY);
+  s_train_icon = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_EMERY);
+  #else 
   s_tram_icon = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_TRAM);
   s_train_icon = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_TRAIN);
+  #endif
 
   // Set the update proc for the info layer
   layer_set_update_proc(s_info_layer, info_layer_update_proc);

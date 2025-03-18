@@ -161,13 +161,21 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
   } else {
     snprintf(subtitle, sizeof(subtitle), "%s - %s", s_station_times[cell_index->row], s_station_lines[cell_index->row]);
   }
-
+  #if PBL_PLATFORM_EMERY
+  graphics_draw_text(ctx, title, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), 
+                      title_bounds, GTextOverflowModeTrailingEllipsis, 
+                      PBL_IF_RECT_ELSE(GTextAlignmentLeft, GTextAlignmentCenter), NULL);
+  graphics_draw_text(ctx, subtitle, fonts_get_system_font(FONT_KEY_GOTHIC_18), 
+                      subtitle_bounds, GTextOverflowModeTrailingEllipsis, 
+                      PBL_IF_RECT_ELSE(GTextAlignmentLeft, GTextAlignmentCenter), NULL);
+  #else
   graphics_draw_text(ctx, title, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), 
                       title_bounds, GTextOverflowModeTrailingEllipsis, 
                       PBL_IF_RECT_ELSE(GTextAlignmentLeft, GTextAlignmentCenter), NULL);
   graphics_draw_text(ctx, subtitle, fonts_get_system_font(FONT_KEY_GOTHIC_14), 
                       subtitle_bounds, GTextOverflowModeTrailingEllipsis, 
                       PBL_IF_RECT_ELSE(GTextAlignmentLeft, GTextAlignmentCenter), NULL);
+  #endif
 }
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {

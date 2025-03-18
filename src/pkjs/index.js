@@ -5,7 +5,6 @@ var Clay = require('pebble-clay');
 var clayConfig = require('./config.json');
 var clay = new Clay(clayConfig);
 
-var initialized = false;
 var stationCache = {};
 var stationIdCache;
 var moreInfoCache = {};
@@ -19,10 +18,7 @@ Pebble.addEventListener("ready", function(e) {
   if (tempApiHost) {
     apiHost = tempApiHost;
   }
-  if (tempRadius || tempApiHost) {
-    initialized = true;
-    navigator.geolocation.getCurrentPosition(success, error, options);
-  }
+  navigator.geolocation.getCurrentPosition(success, error, options);
 });
 
 Pebble.addEventListener("showConfiguration", function(e) {
@@ -43,10 +39,8 @@ Pebble.addEventListener('webviewclosed', function(e) {
   localStorage.setItem("API_HOST", apiHost);
   console.log('radius: ' + radius);
   console.log('apiHost: ' + apiHost);
-  if (!initialized) {
-    initialized = true;
-    navigator.geolocation.getCurrentPosition(success, error, options);
-  }
+
+  navigator.geolocation.getCurrentPosition(success, error, options);
 });
 
 function success(pos) {

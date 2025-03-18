@@ -94,13 +94,21 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
     graphics_context_set_text_color(ctx, is_selected ? GColorWhite : GColorBlack);
     graphics_context_set_fill_color(ctx, is_selected ? PBL_IF_BW_ELSE(GColorBlack, GColorDarkGreen) : GColorWhite);
     graphics_fill_rect(ctx, bounds, 0, GCornerNone);
-  
+    #if PBL_PLATFORM_EMERY
+    graphics_draw_text(ctx, s_station_names[cell_index->row], fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), 
+                      name_bounds, GTextOverflowModeTrailingEllipsis, 
+                      PBL_IF_RECT_ELSE(GTextAlignmentLeft, GTextAlignmentCenter), NULL);
+    graphics_draw_text(ctx, s_station_distances[cell_index->row], fonts_get_system_font(FONT_KEY_GOTHIC_18), 
+                        distance_bounds, GTextOverflowModeTrailingEllipsis, 
+                        PBL_IF_RECT_ELSE(GTextAlignmentLeft, GTextAlignmentCenter), NULL);
+    #else
     graphics_draw_text(ctx, s_station_names[cell_index->row], fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), 
                       name_bounds, GTextOverflowModeTrailingEllipsis, 
                       PBL_IF_RECT_ELSE(GTextAlignmentLeft, GTextAlignmentCenter), NULL);
     graphics_draw_text(ctx, s_station_distances[cell_index->row], fonts_get_system_font(FONT_KEY_GOTHIC_14), 
                         distance_bounds, GTextOverflowModeTrailingEllipsis, 
                         PBL_IF_RECT_ELSE(GTextAlignmentLeft, GTextAlignmentCenter), NULL);
+    #endif
   }
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
