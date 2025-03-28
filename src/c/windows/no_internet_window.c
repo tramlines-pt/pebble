@@ -44,7 +44,7 @@ static void window_load(Window *window) {
   // Create message layer
   s_message_layer = text_layer_create(GRect(0, bounds.size.h - 40, bounds.size.w, 40));
   text_layer_set_text(s_message_layer, "Keine Verbindung :(");
-  #if PBL_PLATFORM_EMERY
+  #if PBL_DISPLAY_HEIGHT == 228
   text_layer_set_font(s_message_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   #endif
   text_layer_set_text_alignment(s_message_layer, GTextAlignmentCenter);

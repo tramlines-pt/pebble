@@ -161,7 +161,7 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
   } else {
     snprintf(subtitle, sizeof(subtitle), "%s - %s", s_station_times[cell_index->row], s_station_lines[cell_index->row]);
   }
-  #if PBL_PLATFORM_EMERY
+  #if PBL_DISPLAY_HEIGHT == 228
   graphics_draw_text(ctx, title, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), 
                       title_bounds, GTextOverflowModeTrailingEllipsis, 
                       PBL_IF_RECT_ELSE(GTextAlignmentLeft, GTextAlignmentCenter), NULL);

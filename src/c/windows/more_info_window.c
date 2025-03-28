@@ -216,7 +216,7 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
   GRect bounds = layer_get_bounds(cell_layer);
   
   // Calculate vertical center position
-  #if PBL_PLATFORM_EMERY
+  #if PBL_DISPLAY_HEIGHT == 228
   GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
   #else
   GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
@@ -576,7 +576,7 @@ static void info_layer_update_proc(Layer *layer, GContext *ctx) {
 
   // Draw the image, if it exists
   if (image != NULL) {
-    #if PBL_PLATFORM_EMERY
+    #if PBL_DISPLAY_HEIGHT == 228
     gdraw_command_image_draw(ctx, image, GPoint(bounds.size.w - 110, y_offset));
     #else
     gdraw_command_image_draw(ctx, image, GPoint(bounds.size.w - 75, y_offset));
@@ -585,7 +585,7 @@ static void info_layer_update_proc(Layer *layer, GContext *ctx) {
 
   // Draw the line name
   graphics_context_set_text_color(ctx, GColorBlack);
-  #if PBL_PLATFORM_EMERY
+  #if PBL_DISPLAY_HEIGHT == 228
   graphics_draw_text(ctx, s_line_name, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD),
                      GRect(x_offset, y_offset, bounds.size.w - 50, line_height), GTextOverflowModeWordWrap,
                      GTextAlignmentLeft, NULL);
@@ -603,7 +603,7 @@ static void info_layer_update_proc(Layer *layer, GContext *ctx) {
     // Check if platform text would be too long and potentially overlap with image
     char platform_text[strlen(s_platform) + 11];
     snprintf(platform_text, sizeof(platform_text), "Platform: %s", s_platform);
-    #if PBL_PLATFORM_EMERY
+    #if PBL_DISPLAY_HEIGHT == 228
     GSize platform_size = graphics_text_layout_get_content_size(
       platform_text,
       fonts_get_system_font(FONT_KEY_GOTHIC_18),
@@ -667,7 +667,7 @@ static void info_layer_update_proc(Layer *layer, GContext *ctx) {
   }
 
   // Draw the time
-  #if PBL_PLATFORM_EMERY
+  #if PBL_DISPLAY_HEIGHT == 228
   graphics_draw_text(ctx, s_time, fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK),
                      GRect(x_offset, y_offset, bounds.size.w - (x_offset * 2), line_height), GTextOverflowModeWordWrap,
                      GTextAlignmentLeft, NULL);
@@ -695,7 +695,7 @@ static void info_layer_update_proc(Layer *layer, GContext *ctx) {
                      GRect(x_offset, y_offset, bounds.size.w - (x_offset * 2), line_height), GTextOverflowModeWordWrap,
                      GTextAlignmentLeft, NULL);
   #else 
-  #if PBL_PLATFORM_EMERY
+  #if PBL_DISPLAY_HEIGHT == 228
   //For some reason the LECO font wont display the minus on Emery either
   //But we have a bigger screen so we use a different font than Aplite
   graphics_draw_text(ctx, s_delay, fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK),
@@ -713,7 +713,7 @@ static void info_layer_update_proc(Layer *layer, GContext *ctx) {
   
   // Draw the destination at the bottom center
   // Calculate the height needed for the destination text (allowing for up to 3 lines)
-    #if PBL_PLATFORM_EMERY
+    #if PBL_DISPLAY_HEIGHT == 228
     GSize destination_size = graphics_text_layout_get_content_size(
       s_destination, 
       fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD),
@@ -765,7 +765,7 @@ static void window_load(Window *window) {
 
   layer_add_child(window_layer, s_info_layer);
 
-  #if PBL_PLATFORM_EMERY
+  #if PBL_DISPLAY_HEIGHT == 228
   s_tram_icon = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_TRAM_EMERY);
   s_train_icon = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_TRAIN_EMERY);
   #else 
