@@ -1,6 +1,7 @@
 var keys = require('message_keys');
 var apiHost = "https://api.tramlines.de";
 var radius = 5000;
+var quickStartToggle = 0;
 var Clay = require('pebble-clay');
 var clayConfig = require('./config.json');
 var clay = new Clay(clayConfig);
@@ -18,6 +19,11 @@ Pebble.addEventListener("ready", function(e) {
   if (tempApiHost) {
     apiHost = tempApiHost;
   }
+  var tempquickStartToggle = localStorage.getItem("QUICK_START");
+  if (tempquickStartToggle) {
+    quickStartToggle = tempquickStartToggle;
+  }
+
   navigator.geolocation.getCurrentPosition(success, error, options);
 });
 
@@ -39,6 +45,9 @@ Pebble.addEventListener('webviewclosed', function(e) {
   localStorage.setItem("API_HOST", apiHost);
   console.log('radius: ' + radius);
   console.log('apiHost: ' + apiHost);
+  quickStartToggle = dict[keys.QUICK_START_TOGGLE];
+  localStorage.setItem("QUICK_START", quickStartToggle);
+  console.log('quickStartToggle: ' + quickStartToggle);
 
   navigator.geolocation.getCurrentPosition(success, error, options);
 });
@@ -50,30 +59,11 @@ function success(pos) {
     // overwrite with test data for either testing or for screenshots
     //lat = 50.934496;
     //lon = 6.981107;
-    var url = `${apiHost}/pebble/stations?lat=${lat}&lon=${lon}&radius=${radius}`;
-    var req = new XMLHttpRequest();
-    req.open('GET', url, true);
-    req.onload = function() {
-      if (req.status >= 200 && req.status < 300) {
-        var response = JSON.parse(req.responseText);
-        var stationsArray = response.map(function(station) {
-          return [station[0], station[1].toString(), station[2].toString()];
-        });
-        // we need to check if the station data will fit in the buffer (uint32_t 4096) (it probably will), 
-        // but if not remove the last element until it fit
-        while (JSON.stringify(stationsArray).length > 4000) {
-          stationsArray.pop();
-        }
-        Pebble.sendAppMessage({"STATIONS_ARRAY": JSON.stringify(stationsArray)});
-      } else {
-        console.log('Error: ' + req.statusText);
-        Pebble.sendAppMessage({"NO_INTERNET": 1});
-      }
-    };
-    req.onerror = function() {
-      Pebble.sendAppMessage({"NO_INTERNET": 1});
-    };
-    req.send();
+    if (quickStartToggle == 1) {
+      quickStart(lat, lon);
+      return;
+    }
+    legacyStart(lat, lon);
 }
 
 function error(err) {
@@ -85,6 +75,68 @@ var options = {
   maximumAge: 10000,
   timeout: 10000
 };
+
+function quickStart(lat, lon) {
+  var url = `${apiHost}/pebble/currentLocation?lat=${lat}&lon=${lon}&radius=${radius}`;
+  var req = new XMLHttpRequest();
+  req.open('GET', url, true);
+  req.onload = function() {
+    if (req.status >= 200 && req.status < 300) {
+      var response = JSON.parse(req.responseText);
+      stationCache = response.departures; // we always cache the last response, because we need it for another request
+      stationIdCache = response.station[2];
+      var departuresArray = response.departures.map(function(departure) {
+        return [
+        departure[2].toString(), // Line
+        departure[3].toString(), // Destination
+        formatTime(departure[4].toString()), // Time
+        departure[5].toString() // Platform
+      ];
+      });
+      // we need to check if the station data will fit in the buffer (uint32_t 4096 (Byte)), 
+      // if not remove the last element until it fits
+      while (JSON.stringify(departuresArray).length > 4000) {
+        departuresArray.pop();
+      }
+      Pebble.sendAppMessage({"STATION_ARRAY": JSON.stringify(departuresArray)});
+    } else {
+      console.log('Error: ' + req.statusText);
+      Pebble.sendAppMessage({"NO_INTERNET": 1});
+    }
+  };
+  req.onerror = function() {
+    Pebble.sendAppMessage({"NO_INTERNET": 1});
+  };
+  req.send();
+}
+
+
+function legacyStart(lat, lon) {
+  var url = `${apiHost}/pebble/stations?lat=${lat}&lon=${lon}&radius=${radius}`;
+  var req = new XMLHttpRequest();
+  req.open('GET', url, true);
+  req.onload = function() {
+    if (req.status >= 200 && req.status < 300) {
+      var response = JSON.parse(req.responseText);
+      var stationsArray = response.map(function(station) {
+        return [station[0], station[1].toString(), station[2].toString()];
+      });
+      // we need to check if the station data will fit in the buffer (uint32_t 4096) (it probably will), 
+      // but if not remove the last element until it fit
+      while (JSON.stringify(stationsArray).length > 4000) {
+        stationsArray.pop();
+      }
+      Pebble.sendAppMessage({"STATIONS_ARRAY": JSON.stringify(stationsArray)});
+    } else {
+      console.log('Error: ' + req.statusText);
+      Pebble.sendAppMessage({"NO_INTERNET": 1});
+    }
+  };
+  req.onerror = function() {
+    Pebble.sendAppMessage({"NO_INTERNET": 1});
+  };
+  req.send();
+}
 
 Pebble.addEventListener("appmessage", function(e) {
   var dict = e.payload;

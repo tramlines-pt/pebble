@@ -1,7 +1,7 @@
 {
   "name": "tramlines",
   "author": "JPlexer",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "keywords": [
     "pebble-app"
   ],
@@ -40,7 +40,8 @@
       "GET_STATION_FROM_STOP",
       "STATION_FROM_STOP",
       "RADIUS",
-      "API_URL"
+      "API_URL",
+      "QUICK_START_TOGGLE"
     ],
     "resources": {
       "media": [
